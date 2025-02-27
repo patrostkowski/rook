@@ -87,6 +87,7 @@ func newCephStatusChecker(context *clusterd.Context, clusterInfo *cephclient.Clu
 func (c *cephStatusChecker) checkCephStatus(monitoringRoutines map[string]*opcontroller.ClusterHealth, daemon string) {
 	// check the status immediately before starting the loop
 	c.checkStatus(monitoringRoutines[daemon].InternalCtx)
+	logger.Infof("Yes, hello from checkCephStatus!!!!!!!!!!!!! this is me!!!!!!!!!!!")
 
 	for {
 		// We must perform this check otherwise the case will check an index that does not exist anymore and
@@ -111,6 +112,7 @@ func (c *cephStatusChecker) checkCephStatus(monitoringRoutines map[string]*opcon
 func (c *cephStatusChecker) checkStatus(ctx context.Context) {
 	var status cephclient.CephStatus
 	var err error
+	logger.Infof("Also, checking status from checkStatus!!!!!!!!!!!!! this is me!!!!!!!!!!!")
 
 	logger.Debugf("checking health of cluster")
 

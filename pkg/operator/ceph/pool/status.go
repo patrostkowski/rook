@@ -23,7 +23,9 @@ import (
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	"github.com/rook/rook/pkg/operator/k8sutil"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -83,6 +85,17 @@ func updateStatusInfo(cephBlockPool *cephv1.CephBlockPool) {
 	}
 
 	cephBlockPool.Status.Info = m
+
+	logger.Infof("Setting empty conditions in the func!!!")
+	cephBlockPool.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "Ceph block pool is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 }
 
 func (r *ReconcileCephBlockPool) updatePoolID(cephBlockPool *cephv1.CephBlockPool) {
