@@ -34,6 +34,7 @@ import (
 	"github.com/rook/rook/pkg/operator/ceph/object/topic"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	kapiv1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -209,6 +210,16 @@ func (r *ReconcileNotifications) reconcile(request reconcile.Request) (reconcile
 			return reconcile.Result{}, *notification, errors.Wrapf(err, "failed to provision notification for ObjectBucketClaims %q", bucketName)
 		}
 		logger.Infof("provisioned CephBucketNotification %q for ObjectBucketClaims %q", bnName, bucketName)
+	}
+
+	notification.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "Ceph block pool is ready",
+			LastTransitionTime: metav1.Now(),
+		},
 	}
 
 	return reconcile.Result{}, *notification, nil
