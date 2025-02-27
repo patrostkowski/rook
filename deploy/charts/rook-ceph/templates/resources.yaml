@@ -844,6 +844,7 @@ spec:
                 phase:
                   type: string
               type: object
+              x-kubernetes-preserve-unknown-fields: true
           required:
             - metadata
             - spec
