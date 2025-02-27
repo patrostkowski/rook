@@ -86,7 +86,6 @@ func updateStatusInfo(cephBlockPool *cephv1.CephBlockPool) {
 
 	cephBlockPool.Status.Info = m
 
-	logger.Infof("Setting empty conditions in the func!!!")
 	cephBlockPool.Status.Conditions = []cephv1.Condition{
 		{
 			Type:               cephv1.ConditionReady,
