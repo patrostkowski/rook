@@ -368,6 +368,15 @@ func (r *ReconcileCephClient) updateStatus(observedGeneration int64, name types.
 		cephClient.Status = &cephv1.CephClientStatus{}
 	}
 
+	cephClient.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "Ceph client is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	cephClient.Status.Phase = status
 	if cephClient.Status.Phase == cephv1.ConditionReady {
 		cephClient.Status.Info = generateStatusInfo(cephClient)

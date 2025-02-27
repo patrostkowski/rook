@@ -2906,6 +2906,8 @@ type CephClientStatus struct {
 	// ObservedGeneration is the latest generation observed by the controller.
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+	// +optional
+	Conditions []Condition `json:"conditions,omitempty"`
 }
 
 // CleanupPolicySpec represents a Ceph Cluster cleanup policy
