@@ -2246,6 +2246,8 @@ type BucketTopicStatus struct {
 	// ObservedGeneration is the latest generation observed by the controller.
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+	// +optional
+	Conditions []Condition `json:"conditions,omitempty"`
 }
 
 // CephBucketTopicList represents a list Ceph Object Store Bucket Notification Topics
