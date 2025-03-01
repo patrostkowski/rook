@@ -388,7 +388,7 @@ func (r *ReconcileCephFilesystemSubVolumeGroup) updateStatus(observedGeneration 
 			Type:               cephv1.ConditionReady,
 			Status:             v1.ConditionTrue,
 			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "CephBucketNotification is ready",
+			Message:            "CephFilesystemSubVolumeGroup is ready",
 			LastTransitionTime: metav1.Now(),
 		},
 	}

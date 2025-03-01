@@ -247,7 +247,7 @@ func (r *ReconcileBucketTopic) updateStatus(observedGeneration int64, nsName typ
 			Type:               cephv1.ConditionReady,
 			Status:             v1.ConditionTrue,
 			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "Ceph block pool is ready",
+			Message:            "CephBucketTopic is ready",
 			LastTransitionTime: metav1.Now(),
 		},
 	}

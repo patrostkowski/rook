@@ -51,7 +51,7 @@ func (r *ReconcileCephFilesystem) updateStatus(observedGeneration int64, namespa
 			Type:               cephv1.ConditionReady,
 			Status:             v1.ConditionTrue,
 			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "Ceph client is ready",
+			Message:            "CephFilesystem is ready",
 			LastTransitionTime: metav1.Now(),
 		},
 	}

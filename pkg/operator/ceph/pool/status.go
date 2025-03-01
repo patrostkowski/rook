@@ -91,7 +91,7 @@ func updateStatusInfo(cephBlockPool *cephv1.CephBlockPool) {
 			Type:               cephv1.ConditionReady,
 			Status:             v1.ConditionTrue,
 			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "Ceph block pool is ready",
+			Message:            "CephBlockPool is ready",
 			LastTransitionTime: metav1.Now(),
 		},
 	}

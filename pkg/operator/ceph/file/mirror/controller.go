@@ -271,7 +271,7 @@ func (r *ReconcileFilesystemMirror) updateStatus(observedGeneration int64, name 
 			Type:               cephv1.ConditionReady,
 			Status:             v1.ConditionTrue,
 			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "CephBucketNotification is ready",
+			Message:            "CephFilesystemMirror is ready",
 			LastTransitionTime: metav1.Now(),
 		},
 	}

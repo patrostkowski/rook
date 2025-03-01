@@ -70,7 +70,7 @@ func updateStatus(ctx context.Context, observedGeneration int64, client client.C
 				Type:               cephv1.ConditionReady,
 				Status:             v1.ConditionTrue,
 				Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-				Message:            "Ceph client is ready",
+				Message:            "CephObjectStore is ready",
 				LastTransitionTime: metav1.Now(),
 			},
 		}

@@ -351,7 +351,7 @@ func (r *ReconcileObjectRealm) updateStatus(observedGeneration int64, name types
 			Type:               cephv1.ConditionReady,
 			Status:             v1.ConditionTrue,
 			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "CephBucketNotification is ready",
+			Message:            "CephObjectRealm is ready",
 			LastTransitionTime: metav1.Now(),
 		},
 	}

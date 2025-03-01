@@ -265,7 +265,7 @@ func (r *ReconcileNotifications) updateStatus(observedGeneration int64, name typ
 			logger.Debugf("CephBucketNotification %q resource not found. Ignoring since object must be deleted", name)
 			return
 		}
-		logger.Warningf("failed to retrieve object realm %q to update status to %q. %v", name, status, err)
+		logger.Warningf("failed to retrieve bucket notification %q to update status to %q. %v", name, status, err)
 		return
 	}
 	if notification.Status == nil {

@@ -396,7 +396,7 @@ func (r *ReconcileCephBlockPoolRadosNamespace) updateStatus(client client.Client
 			Type:               cephv1.ConditionReady,
 			Status:             v1.ConditionTrue,
 			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "CephBucketNotification is ready",
+			Message:            "CephBlockPoolRadosNamespace is ready",
 			LastTransitionTime: metav1.Now(),
 		},
 	}

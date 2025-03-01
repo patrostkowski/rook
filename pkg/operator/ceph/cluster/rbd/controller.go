@@ -295,7 +295,7 @@ func (r *ReconcileCephRBDMirror) updateStatus(observedGeneration int64, name typ
 			Type:               cephv1.ConditionReady,
 			Status:             v1.ConditionTrue,
 			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "CephBucketNotification is ready",
+			Message:            "CephRBDMirror is ready",
 			LastTransitionTime: metav1.Now(),
 		},
 	}
