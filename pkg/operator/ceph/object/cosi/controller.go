@@ -32,8 +32,11 @@ import (
 	"github.com/rook/rook/pkg/operator/k8sutil"
 	appsv1 "k8s.io/api/apps/v1"
 	kapiv1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -132,6 +135,13 @@ func (r *ReconcileCephCOSIDriver) reconcile(request reconcile.Request) (reconcil
 		logger.Debugf("CephCOSIDriver: %+v", cephCOSIDriver)
 	}
 
+	observedGeneration := cephCOSIDriver.ObjectMeta.Generation
+
+	// The CR was just created, initializing status fields
+	if cephCOSIDriver.Status == nil {
+		r.updateStatus(k8sutil.ObservedGenerationNotAvailable, request.NamespacedName, k8sutil.EmptyStatus)
+	}
+
 	// While in experimental mode, the COSI driver is not enabled by default
 	cosiDeploymentStrategy := cephv1.COSIDeploymentStrategyNever
 
@@ -187,6 +197,8 @@ func (r *ReconcileCephCOSIDriver) reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, *cephCOSIDriver, errors.Wrap(err, "failed to start Ceph COSI Driver")
 	}
 
+	r.updateStatus(observedGeneration, request.NamespacedName, k8sutil.EmptyStatus)
+
 	return reconcile.Result{}, *cephCOSIDriver, nil
 }
 
@@ -215,4 +227,39 @@ func (r *ReconcileCephCOSIDriver) startCephCOSIDriver(cephCOSIDriver *cephv1.Cep
 	}
 
 	return nil
+}
+
+// updateStatus updates an realm with a given status
+func (r *ReconcileCephCOSIDriver) updateStatus(observedGeneration int64, name types.NamespacedName, status string) {
+	cephCOSIDriver := &cephv1.CephCOSIDriver{}
+	if err := r.client.Get(r.opManagerContext, name, cephCOSIDriver); err != nil {
+		if kerrors.IsNotFound(err) {
+			logger.Debugf("CephCOSIDriver %q resource not found. Ignoring since object must be deleted", name)
+			return
+		}
+		logger.Warningf("failed to retrieve object realm %q to update status to %q. %v", name, status, err)
+		return
+	}
+	if cephCOSIDriver.Status == nil {
+		cephCOSIDriver.Status = &cephv1.Status{}
+	}
+
+	cephCOSIDriver.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephCOSIDriver is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
+	cephCOSIDriver.Status.Phase = status
+	if observedGeneration != k8sutil.ObservedGenerationNotAvailable {
+		cephCOSIDriver.Status.ObservedGeneration = observedGeneration
+	}
+	if err := reporting.UpdateStatus(r.client, cephCOSIDriver); err != nil {
+		logger.Errorf("failed to set object realm %q status to %q. %v", name, status, err)
+		return
+	}
+	logger.Debugf("object realm %q status updated to %q", name, status)
 }
