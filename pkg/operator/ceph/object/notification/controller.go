@@ -33,6 +33,7 @@ import (
 	"github.com/rook/rook/pkg/operator/ceph/object/bucket"
 	"github.com/rook/rook/pkg/operator/ceph/object/topic"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
+	"github.com/rook/rook/pkg/operator/k8sutil"
 	kapiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -136,14 +137,9 @@ func (r *ReconcileNotifications) reconcile(request reconcile.Request) (reconcile
 		return reconcile.Result{}, *notification, errors.Wrapf(err, "failed to retrieve CephBucketNotification %q", bnName)
 	}
 
-	notification.Status.Conditions = []cephv1.Condition{
-		{
-			Type:               cephv1.ConditionReady,
-			Status:             v1.ConditionTrue,
-			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
-			Message:            "CephBucketNotification is ready",
-			LastTransitionTime: metav1.Now(),
-		},
+	// The CR was just created, initializing status fields
+	if notification.Status == nil {
+		r.updateStatus(k8sutil.ObservedGenerationNotAvailable, request.NamespacedName, k8sutil.EmptyStatus)
 	}
 
 	// DELETE: the CR was deleted
@@ -222,6 +218,8 @@ func (r *ReconcileNotifications) reconcile(request reconcile.Request) (reconcile
 		logger.Infof("provisioned CephBucketNotification %q for ObjectBucketClaims %q", bnName, bucketName)
 	}
 
+	r.updateStatus(k8sutil.ObservedGenerationNotAvailable, request.NamespacedName, k8sutil.EmptyStatus)
+
 	return reconcile.Result{}, *notification, nil
 }
 
@@ -257,4 +255,39 @@ func getReadyCluster(client client.Client, opManagerContext context.Context, con
 		return nil, nil, errors.Wrap(err, "failed to populate cluster info")
 	}
 	return clusterInfo, &cephCluster.Spec, nil
+}
+
+// updateStatus updates an realm with a given status
+func (r *ReconcileNotifications) updateStatus(observedGeneration int64, name types.NamespacedName, status string) {
+	notification := &cephv1.CephBucketNotification{}
+	if err := r.client.Get(r.opManagerContext, name, notification); err != nil {
+		if kerrors.IsNotFound(err) {
+			logger.Debugf("CephBucketNotification %q resource not found. Ignoring since object must be deleted", name)
+			return
+		}
+		logger.Warningf("failed to retrieve object realm %q to update status to %q. %v", name, status, err)
+		return
+	}
+	if notification.Status == nil {
+		notification.Status = &cephv1.Status{}
+	}
+
+	notification.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephBucketNotification is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
+	notification.Status.Phase = status
+	if observedGeneration != k8sutil.ObservedGenerationNotAvailable {
+		notification.Status.ObservedGeneration = observedGeneration
+	}
+	if err := reporting.UpdateStatus(r.client, notification); err != nil {
+		logger.Errorf("failed to set bucket notification %q status to %q. %v", name, status, err)
+		return
+	}
+	logger.Debugf("bucket notification %q status updated to %q", name, status)
 }
