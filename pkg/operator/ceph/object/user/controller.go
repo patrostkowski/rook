@@ -43,6 +43,7 @@ import (
 	"github.com/rook/rook/pkg/operator/ceph/object"
 	"github.com/rook/rook/pkg/operator/k8sutil"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -691,6 +692,15 @@ func (r *ReconcileObjectStoreUser) updateStatus(observedGeneration int64, name t
 		user.Status = &cephv1.ObjectStoreUserStatus{}
 	}
 
+	user.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephBucketNotification is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	user.Status.Phase = status
 	if user.Status.Phase == k8sutil.ReadyStatus {
 		user.Status.Info = generateStatusInfo(user)

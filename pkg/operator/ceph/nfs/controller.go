@@ -355,6 +355,16 @@ func updateStatus(observedGeneration int64, client client.Client, name types.Nam
 		nfs.Status = &cephv1.Status{}
 	}
 
+	nfs.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "Ceph client is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
+
 	nfs.Status.Phase = status
 	if observedGeneration != k8sutil.ObservedGenerationNotAvailable {
 		nfs.Status.ObservedGeneration = observedGeneration

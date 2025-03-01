@@ -28,6 +28,7 @@ import (
 
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -424,6 +425,15 @@ func (r *ReconcileObjectZone) updateStatus(observedGeneration int64, name types.
 		objectZone.Status = &cephv1.Status{}
 	}
 
+	objectZone.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephBucketNotification is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	objectZone.Status.Phase = status
 	if observedGeneration != k8sutil.ObservedGenerationNotAvailable {
 		objectZone.Status.ObservedGeneration = observedGeneration

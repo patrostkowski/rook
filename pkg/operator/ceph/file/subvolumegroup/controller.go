@@ -44,6 +44,7 @@ import (
 	"github.com/rook/rook/pkg/operator/ceph/file"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	"github.com/rook/rook/pkg/operator/k8sutil"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -382,6 +383,15 @@ func (r *ReconcileCephFilesystemSubVolumeGroup) updateStatus(observedGeneration 
 		cephFilesystemSubVolumeGroup.Status = &cephv1.CephFilesystemSubVolumeGroupStatus{}
 	}
 
+	cephFilesystemSubVolumeGroup.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephBucketNotification is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	cephFilesystemSubVolumeGroup.Status.Phase = status
 	cephFilesystemSubVolumeGroup.Status.Info = map[string]string{
 		"clusterID": buildClusterID(cephFilesystemSubVolumeGroup),

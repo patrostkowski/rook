@@ -23,7 +23,9 @@ import (
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	"github.com/rook/rook/pkg/operator/k8sutil"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -44,6 +46,15 @@ func (r *ReconcileCephFilesystem) updateStatus(observedGeneration int64, namespa
 		fs.Status = &cephv1.CephFilesystemStatus{}
 	}
 
+	fs.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "Ceph client is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	fs.Status.Phase = status
 	fs.Status.Info = info
 	if observedGeneration != k8sutil.ObservedGenerationNotAvailable {

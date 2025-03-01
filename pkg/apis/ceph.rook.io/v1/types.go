@@ -1971,6 +1971,8 @@ type ObjectStoreUserStatus struct {
 	// ObservedGeneration is the latest generation observed by the controller.
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+	// +optional
+	Conditions []Condition `json:"conditions,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -3386,6 +3388,8 @@ type CephFilesystemSubVolumeGroupStatus struct {
 	// ObservedGeneration is the latest generation observed by the controller.
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+	// +optional
+	Conditions []Condition `json:"conditions,omitempty"`
 }
 
 // +genclient
@@ -3468,6 +3472,8 @@ type CephBlockPoolRadosNamespaceStatus struct {
 	MirroringInfo *MirroringInfoSpec `json:"mirroringInfo,omitempty"`
 	// +optional
 	SnapshotScheduleStatus *SnapshotScheduleStatusSpec `json:"snapshotScheduleStatus,omitempty"`
+	// +optional
+	Conditions []Condition `json:"conditions,omitempty"`
 }
 
 // Represents the source of a volume to mount.
@@ -3513,7 +3519,8 @@ type CephCOSIDriver struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 	// Spec represents the specification of a Ceph COSI Driver
-	Spec CephCOSIDriverSpec `json:"spec"`
+	Spec   CephCOSIDriverSpec `json:"spec"`
+	Status *Status            `json:"status,omitempty"`
 }
 
 // CephCOSIDriverList represents a list of Ceph COSI Driver

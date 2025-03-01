@@ -290,6 +290,15 @@ func (r *ReconcileCephRBDMirror) updateStatus(observedGeneration int64, name typ
 		rbdMirror.Status = &cephv1.Status{}
 	}
 
+	rbdMirror.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephBucketNotification is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	rbdMirror.Status.Phase = status
 	if observedGeneration != k8sutil.ObservedGenerationNotAvailable {
 		rbdMirror.Status.ObservedGeneration = observedGeneration

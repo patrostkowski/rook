@@ -35,6 +35,7 @@ import (
 
 	"github.com/coreos/pkg/capnslog"
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -390,6 +391,15 @@ func (r *ReconcileCephBlockPoolRadosNamespace) updateStatus(client client.Client
 		cephBlockPoolRadosNamespace.Status = &cephv1.CephBlockPoolRadosNamespaceStatus{}
 	}
 
+	cephBlockPoolRadosNamespace.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephBucketNotification is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	cephBlockPoolRadosNamespace.Status.Phase = status
 	cephBlockPoolRadosNamespace.Status.Info = map[string]string{"clusterID": buildClusterID(cephBlockPoolRadosNamespace)}
 	if err := reporting.UpdateStatus(client, cephBlockPoolRadosNamespace); err != nil {

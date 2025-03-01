@@ -24,7 +24,9 @@ import (
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	"github.com/rook/rook/pkg/operator/k8sutil"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -63,6 +65,15 @@ func updateStatus(ctx context.Context, observedGeneration int64, client client.C
 			return nil // do not transition to other statuses once deletion begins
 		}
 
+		objectStore.Status.Conditions = []cephv1.Condition{
+			{
+				Type:               cephv1.ConditionReady,
+				Status:             v1.ConditionTrue,
+				Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+				Message:            "Ceph client is ready",
+				LastTransitionTime: metav1.Now(),
+			},
+		}
 		objectStore.Status.Phase = status
 		objectStore.Status.Info = info
 		if observedGeneration != k8sutil.ObservedGenerationNotAvailable {

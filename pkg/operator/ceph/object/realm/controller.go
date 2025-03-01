@@ -346,6 +346,15 @@ func (r *ReconcileObjectRealm) updateStatus(observedGeneration int64, name types
 		objectRealm.Status = &cephv1.Status{}
 	}
 
+	objectRealm.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephBucketNotification is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	objectRealm.Status.Phase = status
 	if observedGeneration != k8sutil.ObservedGenerationNotAvailable {
 		objectRealm.Status.ObservedGeneration = observedGeneration

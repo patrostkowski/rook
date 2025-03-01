@@ -266,6 +266,15 @@ func (r *ReconcileFilesystemMirror) updateStatus(observedGeneration int64, name 
 		fsMirror.Status = &cephv1.Status{}
 	}
 
+	fsMirror.Status.Conditions = []cephv1.Condition{
+		{
+			Type:               cephv1.ConditionReady,
+			Status:             v1.ConditionTrue,
+			Reason:             cephv1.ConditionReason(cephv1.ConditionReady),
+			Message:            "CephBucketNotification is ready",
+			LastTransitionTime: metav1.Now(),
+		},
+	}
 	fsMirror.Status.Phase = status
 	if observedGeneration != k8sutil.ObservedGenerationNotAvailable {
 		fsMirror.Status.ObservedGeneration = observedGeneration
