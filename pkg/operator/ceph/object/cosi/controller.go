@@ -237,7 +237,7 @@ func (r *ReconcileCephCOSIDriver) updateStatus(observedGeneration int64, name ty
 			logger.Debugf("CephCOSIDriver %q resource not found. Ignoring since object must be deleted", name)
 			return
 		}
-		logger.Warningf("failed to retrieve object realm %q to update status to %q. %v", name, status, err)
+		logger.Warningf("failed to retrieve cosi driver %q to update status to %q. %v", name, status, err)
 		return
 	}
 	if cephCOSIDriver.Status == nil {
@@ -258,8 +258,8 @@ func (r *ReconcileCephCOSIDriver) updateStatus(observedGeneration int64, name ty
 		cephCOSIDriver.Status.ObservedGeneration = observedGeneration
 	}
 	if err := reporting.UpdateStatus(r.client, cephCOSIDriver); err != nil {
-		logger.Errorf("failed to set object realm %q status to %q. %v", name, status, err)
+		logger.Errorf("failed to set cosi driver %q status to %q. %v", name, status, err)
 		return
 	}
-	logger.Debugf("object realm %q status updated to %q", name, status)
+	logger.Debugf("cosi driver %q status updated to %q", name, status)
 }
