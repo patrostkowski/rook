@@ -258,13 +258,15 @@ func (r *ReconcileCephNFS) daemonContainer(nfs *cephv1.CephNFS, cfg daemonConfig
 
 func (r *ReconcileCephNFS) defaultGaneshaLivenessProbe(nfs *cephv1.CephNFS) *v1.Probe {
 	failureThreshold := int32(10)
+	nfsPortRcp := uint16(*nfs.Spec.Server.NFSPort)
+	nfsPortTcp := int32(*nfs.Spec.Server.NFSPort)
 	cephVersionWithRpcinfo := version.CephVersion{Major: 18, Minor: 2, Extra: 1}
 	if r.clusterInfo.CephVersion.IsAtLeast(cephVersionWithRpcinfo) {
 		// liveness-probe using rpcinfo utility
-		return controller.GenerateLivenessProbeViaRpcinfo(uint16(*nfs.Spec.Server.NFSPort), failureThreshold)
+		return controller.GenerateLivenessProbeViaRpcinfo(nfsPortRcp, failureThreshold)
 	}
 	// liveness-probe using K8s builtin TCP-socket action
-	return controller.GenerateLivenessProbeTcpPort(int32(*nfs.Spec.Server.NFSPort), failureThreshold)
+	return controller.GenerateLivenessProbeTcpPort(nfsPortTcp, failureThreshold)
 }
 
 func (r *ReconcileCephNFS) dbusContainer(nfs *cephv1.CephNFS) v1.Container {
