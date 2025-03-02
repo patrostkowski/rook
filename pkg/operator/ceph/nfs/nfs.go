@@ -302,6 +302,10 @@ func validateGanesha(context *clusterd.Context, clusterInfo *cephclient.ClusterI
 		return errors.New("at least one active server required")
 	}
 
+	if n.Spec.Server.HostNetwork != nil && *n.Spec.Server.HostNetwork && n.Spec.Server.NFSPort == nil {
+		return errors.New("NFSPort is unset when running on Host network")
+	}
+
 	return nil
 }
 

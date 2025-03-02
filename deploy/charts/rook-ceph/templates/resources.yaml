@@ -9966,6 +9966,10 @@ spec:
                     logLevel:
                       description: LogLevel set logging level
                       type: string
+                    nfsPort:
+                      description: Specifies the NFS server port; defaults to 2049 if not set.
+                      nullable: true
+                      type: integer
                     placement:
                       nullable: true
                       properties:

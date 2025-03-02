@@ -21,6 +21,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -96,11 +97,13 @@ func getGaneshaConfig(n *cephv1.CephNFS, version cephver.CephVersion, name strin
 	nodeID := getNFSNodeID(n, name)
 	userID := getNFSUserID(nodeID)
 	url := getRadosURL(n)
+	nfsPort := strconv.Itoa(*n.Spec.Server.NFSPort)
 	return `
 NFS_CORE_PARAM {
 	Enable_NLM = false;
 	Enable_RQUOTA = false;
 	Protocols = 4;
+	NFS_Port = "` + nfsPort + `"
 }
 
 MDCACHE {

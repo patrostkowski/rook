@@ -28,24 +28,24 @@ export HELM_HOME
 $(HELM_OUTPUT_DIR):
 	@mkdir -p $@
 
-$(HELM):
-	@echo === installing helm
-	@mkdir -p $(TOOLS_HOST_DIR)/tmp
-	@curl -sL https://get.helm.sh/helm-$(HELM_VERSION)-$(shell go env GOHOSTOS)-$(GOHOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp
-	@mv $(TOOLS_HOST_DIR)/tmp/$(shell go env GOHOSTOS)-$(GOHOSTARCH)/helm $(HELM)
-	@rm -fr $(TOOLS_HOST_DIR)/tmp
+# $(HELM):
+# 	@echo === installing helm
+# 	@mkdir -p $(TOOLS_HOST_DIR)/tmp
+# 	@curl -sL https://get.helm.sh/helm-$(HELM_VERSION)-$(shell go env GOHOSTOS)-$(GOHOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp
+# 	@mv $(TOOLS_HOST_DIR)/tmp/$(shell go env GOHOSTOS)-$(GOHOSTARCH)/helm $(HELM)
+# 	@rm -fr $(TOOLS_HOST_DIR)/tmp
 
-define helm.chart
-$(HELM_OUTPUT_DIR)/$(1)-$(VERSION).tgz: $(HELM) $(HELM_OUTPUT_DIR) $(shell find $(HELM_CHARTS_DIR)/$(1) -type f)
-	@echo === helm package $(1)
-	@rm -rf $(OUTPUT_DIR)/$(1)
-	@cp -aL $(HELM_CHARTS_DIR)/$(1) $(OUTPUT_DIR)
-	@$(SED_IN_PLACE) 's|master|$(VERSION)|g' $(OUTPUT_DIR)/$(1)/values.yaml
-	@$(HELM) lint $(abspath $(OUTPUT_DIR)/$(1)) --set image.tag=$(VERSION)
-	@$(HELM) package --version $(VERSION) --app-version $(VERSION) -d $(HELM_OUTPUT_DIR) $(abspath $(OUTPUT_DIR)/$(1))
-$(HELM_INDEX): $(HELM_OUTPUT_DIR)/$(1)-$(VERSION).tgz
-endef
-$(foreach p,$(HELM_CHARTS),$(eval $(call helm.chart,$(p))))
+# define helm.chart
+# $(HELM_OUTPUT_DIR)/$(1)-$(VERSION).tgz: $(HELM) $(HELM_OUTPUT_DIR) $(shell find $(HELM_CHARTS_DIR)/$(1) -type f)
+# 	@echo === helm package $(1)
+# 	@rm -rf $(OUTPUT_DIR)/$(1)
+# 	@cp -aL $(HELM_CHARTS_DIR)/$(1) $(OUTPUT_DIR)
+# 	@$(SED_IN_PLACE) 's|master|$(VERSION)|g' $(OUTPUT_DIR)/$(1)/values.yaml
+# 	@$(HELM) lint $(abspath $(OUTPUT_DIR)/$(1)) --set image.tag=$(VERSION)
+# 	@$(HELM) package --version $(VERSION) --app-version $(VERSION) -d $(HELM_OUTPUT_DIR) $(abspath $(OUTPUT_DIR)/$(1))
+# $(HELM_INDEX): $(HELM_OUTPUT_DIR)/$(1)-$(VERSION).tgz
+# endef
+# $(foreach p,$(HELM_CHARTS),$(eval $(call helm.chart,$(p))))
 
 $(HELM_INDEX): $(HELM) $(HELM_OUTPUT_DIR)
 	@echo === helm index

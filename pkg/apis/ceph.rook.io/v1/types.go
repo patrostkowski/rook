@@ -2510,6 +2510,11 @@ type GaneshaServerSpec struct {
 	// +optional
 	HostNetwork *bool `json:"hostNetwork,omitempty"`
 
+	// Specifies the NFS server port; defaults to 2049 if not set.
+	// +nullable
+	// +optional
+	NFSPort *int `json:"nfsPort,omitempty"`
+
 	// A liveness-probe to verify that Ganesha server has valid run-time state.
 	// If LivenessProbe.Disabled is false and LivenessProbe.Probe is nil uses default probe.
 	// +optional

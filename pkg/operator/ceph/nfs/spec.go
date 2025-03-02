@@ -59,7 +59,7 @@ func (r *ReconcileCephNFS) generateCephNFSService(nfs *cephv1.CephNFS, cfg daemo
 				{
 					Name:       "nfs",
 					Port:       nfsPort,
-					TargetPort: intstr.FromInt(int(nfsPort)),
+					TargetPort: intstr.FromInt(*nfs.Spec.Server.NFSPort),
 					Protocol:   v1.ProtocolTCP,
 				},
 				{
