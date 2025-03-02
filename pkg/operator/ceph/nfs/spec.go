@@ -39,7 +39,7 @@ const (
 	// AppName is the name of the app
 	AppName               = "rook-ceph-nfs"
 	ganeshaConfigVolume   = "ganesha-config"
-	nfsPort               = 2049
+	svcNfsPort            = 2049
 	ganeshaPid            = "/var/run/ganesha/ganesha.pid"
 	nfsGaneshaMetricsPort = 9587
 )
@@ -58,7 +58,7 @@ func (r *ReconcileCephNFS) generateCephNFSService(nfs *cephv1.CephNFS, cfg daemo
 			Ports: []v1.ServicePort{
 				{
 					Name:       "nfs",
-					Port:       nfsPort,
+					Port:       svcNfsPort,
 					TargetPort: intstr.FromInt(*nfs.Spec.Server.NFSPort),
 					Protocol:   v1.ProtocolTCP,
 				},
@@ -98,7 +98,7 @@ func (r *ReconcileCephNFS) createCephNFSService(nfs *cephv1.CephNFS, cfg daemonC
 		return nil
 	}
 
-	logger.Infof("ceph nfs service running at %s:%d", svc.Spec.ClusterIP, nfsPort)
+	logger.Infof("ceph nfs service running at %s:%d", svc.Spec.ClusterIP, *nfs.Spec.Server.NFSPort)
 	return nil
 }
 
@@ -261,10 +261,10 @@ func (r *ReconcileCephNFS) defaultGaneshaLivenessProbe(nfs *cephv1.CephNFS) *v1.
 	cephVersionWithRpcinfo := version.CephVersion{Major: 18, Minor: 2, Extra: 1}
 	if r.clusterInfo.CephVersion.IsAtLeast(cephVersionWithRpcinfo) {
 		// liveness-probe using rpcinfo utility
-		return controller.GenerateLivenessProbeViaRpcinfo(nfsPort, failureThreshold)
+		return controller.GenerateLivenessProbeViaRpcinfo(uint16(*nfs.Spec.Server.NFSPort), failureThreshold)
 	}
 	// liveness-probe using K8s builtin TCP-socket action
-	return controller.GenerateLivenessProbeTcpPort(nfsPort, failureThreshold)
+	return controller.GenerateLivenessProbeTcpPort(int32(*nfs.Spec.Server.NFSPort), failureThreshold)
 }
 
 func (r *ReconcileCephNFS) dbusContainer(nfs *cephv1.CephNFS) v1.Container {

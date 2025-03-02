@@ -10,6 +10,7 @@ spec:
   # Settings for the NFS server
   server:
     active: 1
+    hostNetwork: true
     logLevel: NIV_DEBUG
   security: {}
 ---
