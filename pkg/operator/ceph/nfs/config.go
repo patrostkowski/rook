@@ -94,6 +94,7 @@ func (r *ReconcileCephNFS) generateKeyring(n *cephv1.CephNFS, name string) error
 }
 
 func getGaneshaConfig(n *cephv1.CephNFS, version cephver.CephVersion, name string) string {
+	logger.Infof("setting ganesha config %v", n)
 	nodeID := getNFSNodeID(n, name)
 	userID := getNFSUserID(nodeID)
 	url := getRadosURL(n)

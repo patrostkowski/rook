@@ -77,6 +77,8 @@ func (r *ReconcileCephNFS) generateCephNFSService(nfs *cephv1.CephNFS, cfg daemo
 		svc.Spec.ClusterIP = v1.ClusterIPNone
 	}
 
+	logger.Infof("setting nfs svc %v", svc)
+
 	return svc
 }
 
@@ -253,6 +255,7 @@ func (r *ReconcileCephNFS) daemonContainer(nfs *cephv1.CephNFS, cfg daemonConfig
 		SecurityContext: controller.PodSecurityContext(),
 		LivenessProbe:   r.defaultGaneshaLivenessProbe(nfs),
 	}
+	logger.Infof("creating ganesha container %v", container)
 	return cephconfig.ConfigureLivenessProbe(container, nfs.Spec.Server.LivenessProbe)
 }
 
