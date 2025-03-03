@@ -267,6 +267,10 @@ func (r *ReconcileCephNFS) reconcile(request reconcile.Request) (reconcile.Resul
 
 	cephNFS.Spec.RADOS.Pool = nfsDefaultPoolName
 	cephNFS.Spec.RADOS.Namespace = cephNFS.Name
+	if cephNFS.Spec.Server.NFSPort == nil {
+		defaultPort := 2049
+		cephNFS.Spec.Server.NFSPort = &defaultPort
+	}
 
 	// validate the store settings
 	if err := validateGanesha(r.context, r.clusterInfo, cephNFS); err != nil {
