@@ -431,3 +431,66 @@ func TestClusterFullSettings(t *testing.T) {
 		assert.False(t, setBackfillFullRatio)
 	})
 }
+
+func TestMergeCephConfigs(t *testing.T) {
+	secretConfig := map[string]map[string]string{
+		"global": {
+			"osd_pool_default_size":          "3",
+			"mon_warn_on_pool_no_redundancy": "false",
+			"osd_crush_update_on_start":      "false",
+		},
+		"osd.*": {
+			"osd_max_scrubs": "10",
+		},
+	}
+
+	specConfig := map[string]map[string]string{
+		"mgr": {
+			"mgr/devicehealth/enable_monitoring": "true",
+		},
+	}
+
+	expected := map[string]map[string]string{
+		"global": {
+			"osd_pool_default_size":          "3",
+			"mon_warn_on_pool_no_redundancy": "false",
+			"osd_crush_update_on_start":      "false",
+		},
+		"osd.*": {
+			"osd_max_scrubs": "10",
+		},
+		"mgr": {
+			"mgr/devicehealth/enable_monitoring": "true",
+		},
+	}
+
+	merged := mergeCephConfigs(secretConfig, specConfig)
+
+	assert.Equal(t, expected, merged)
+}
+
+func TestMergeCephConfigsWithOverride(t *testing.T) {
+	base := map[string]map[string]string{
+		"global": {
+			"osd_pool_default_size": "2",
+			"log_file":              "/var/log/ceph.log",
+		},
+	}
+
+	override := map[string]map[string]string{
+		"global": {
+			"osd_pool_default_size": "4", // should override
+		},
+	}
+
+	expected := map[string]map[string]string{
+		"global": {
+			"osd_pool_default_size": "4",
+			"log_file":              "/var/log/ceph.log",
+		},
+	}
+
+	merged := mergeCephConfigs(base, override)
+
+	assert.Equal(t, expected, merged)
+}

@@ -238,6 +238,11 @@ type ClusterSpec struct {
 	// +optional
 	// +nullable
 	CephConfig map[string]map[string]string `json:"cephConfig,omitempty"`
+
+	// A Kubernetes Secret with Ceph config values
+	// +optional
+	// +nullable
+	CephConfigSecretRef *v1.SecretReference `json:"cephConfigSecretRef,omitempty"`
 }
 
 // CSIDriverSpec defines CSI Driver settings applied per cluster.

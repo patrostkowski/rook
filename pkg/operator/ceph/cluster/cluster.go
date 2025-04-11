@@ -29,6 +29,7 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/clusterd"
@@ -567,7 +568,12 @@ func (c *cluster) shouldSetClusterFullSettings() bool {
 
 func (c *cluster) updateConfigStoreFromCRD() error {
 	monStore := config.GetMonStore(c.context, c.ClusterInfo)
-	return monStore.SetAllMultiple(c.Spec.CephConfig)
+	cephConfig, err := c.getMergedCephConfig()
+	if err != nil {
+		cephConfig = c.Spec.CephConfig
+		logger.Errorf("failed to parse CephConfig and CephConfigSecretRef %q, continue without CephConfigSecretRef: %s", c.Spec.CephConfigSecretRef.Name, err)
+	}
+	return monStore.SetAllMultiple(cephConfig)
 }
 
 func (c *cluster) reportTelemetry() {
@@ -740,4 +746,64 @@ func (c *cluster) configureMsgr2() error {
 	}
 
 	return nil
+}
+
+func (c *cluster) getMergedCephConfig() (map[string]map[string]string, error) {
+	// If no secret ref, just return the spec config
+	if c.Spec.CephConfigSecretRef == nil {
+		return c.Spec.CephConfig, nil
+	}
+
+	secretConfig, err := c.fetchCephConfigFromSecret()
+	if err != nil {
+		return nil, err
+	}
+
+	merged := mergeCephConfigs(secretConfig, c.Spec.CephConfig)
+	return merged, nil
+}
+
+// fetchCephConfigFromSecret fetches and parses the cephConfig YAML from the referenced secret
+func (c *cluster) fetchCephConfigFromSecret() (map[string]map[string]string, error) {
+	secret, err := c.context.Clientset.CoreV1().Secrets(c.ClusterInfo.Namespace).Get(
+		c.ClusterInfo.Context, c.Spec.CephConfigSecretRef.Name, metav1.GetOptions{},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get CephConfigSecretRef %q: %w", c.Spec.CephConfigSecretRef.Name, err)
+	}
+
+	raw, ok := secret.Data["cephConfig"]
+	if !ok {
+		return nil, fmt.Errorf("secret %q is missing key 'cephConfig'", c.Spec.CephConfigSecretRef.Name)
+	}
+
+	var parsed map[string]map[string]string
+	if err := yaml.Unmarshal(raw, &parsed); err != nil {
+		return nil, fmt.Errorf("failed to parse cephConfig from secret data: %w", err)
+	}
+
+	return parsed, nil
+}
+
+// mergeCephConfigs combines two configs, where `override` takes precedence over `base`
+func mergeCephConfigs(base, override map[string]map[string]string) map[string]map[string]string {
+	merged := make(map[string]map[string]string)
+
+	for section, options := range base {
+		merged[section] = map[string]string{}
+		for key, val := range options {
+			merged[section][key] = val
+		}
+	}
+
+	for section, options := range override {
+		if merged[section] == nil {
+			merged[section] = map[string]string{}
+		}
+		for key, val := range options {
+			merged[section][key] = val
+		}
+	}
+
+	return merged
 }
