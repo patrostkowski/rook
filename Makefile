@@ -207,7 +207,7 @@ prune: ## Prune cached artifacts.
 	@$(MAKE) -C images prune
 
 gen.crds: crds
-crds: $(CONTROLLER_GEN) $(YQ)
+crds: $(CONTROLLER_GEN) $(YQ) ## Generate and update CustomResourceDefinition (CRD) manifests and documentation
 	@echo Updating CRD manifests
 	@build/crds/build-crds.sh $(CONTROLLER_GEN) $(YQ)
 	@GOBIN=$(GOBIN) build/crds/generate-crd-docs.sh

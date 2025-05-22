@@ -7,7 +7,7 @@ don't hesitate to reach out to us on our [Slack](https://Rook-io.slack.com) dev 
 
 ## Prerequisites
 
-1. [GO 1.22](https://golang.org/dl/) or greater installed
+1. [GO 1.24](https://golang.org/dl/) or greater installed
 2. Git client installed
 3. GitHub account
 
@@ -130,6 +130,24 @@ rook
     ├── integration               # integration test cases that will be invoked during golang testing
     └── scripts                   # scripts for setting up integration and manual testing environments
 
+```
+
+## Generating Custom Resource Definitions (CRDs)
+
+Rook defines several Custom Resource Definitions (CRDs) to configure and manage Ceph clusters. When developing or modifying these CRDs, you must regenerate the CRD manifests and related documentation.
+
+When to Regenerate:
+
+- You modified files in `pkg/apis/*`
+- You added or updated CRD validation schemas
+- You're updating or reviewing CRD documentation
+
+How to Generate:
+
+Use the following command to generate CRD YAMLs and documentation:
+
+```bash
+make crds
 ```
 
 ## Development
